@@ -22,7 +22,9 @@ html,body{height:100%;background:#0e0e0c;color:#f0efe8;font-family:-apple-system
 .shuffle-btn:active{opacity:.7;transform:scale(.98)}
 .shuffle-btn.spinning{background:#2a2a26;color:#686860}
 .pair-card{background:#161614;border:.5px solid #2a2a26;border-radius:12px;margin-bottom:10px;overflow:hidden}
+.pair-card.warmup-card{border-color:#2a3a4a}
 .pair-header{padding:8px 14px;background:#1a1a16;font-size:10px;font-weight:700;color:#686860;letter-spacing:.08em;text-transform:uppercase}
+.pair-header.warmup-header{background:#0e1a26;color:#5a90c0}
 .ex-row{padding:13px 14px;display:flex;align-items:center;gap:10px;border-top:.5px solid #2a2a26}
 .ex-row:first-of-type{border-top:none}
 .badge{font-size:10px;font-weight:700;padding:4px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;letter-spacing:.03em}
@@ -32,6 +34,7 @@ html,body{height:100%;background:#0e0e0c;color:#f0efe8;font-family:-apple-system
 .core{background:#18103a;color:#a090f0}
 .hinge{background:#2a0d05;color:#e07050}
 .full{background:#052018;color:#30d090}
+.warmup{background:#0e1a26;color:#70b0e0}
 .ex-info{flex:1;min-width:0}
 .ex-name{font-size:14px;font-weight:500;color:#f0efe8}
 .ex-reps{font-size:12px;color:#686860;margin-top:2px}
@@ -80,11 +83,12 @@ html,body{height:100%;background:#0e0e0c;color:#f0efe8;font-family:-apple-system
       <div id="pairs-out"></div>
       <div class="rules-card">
         <div class="rules-title">How it works</div>
-        <div class="rule"><span class="rule-n">1</span>Do A then B back to back, then rest. That's 1 set.</div>
-        <div class="rule"><span class="rule-n">2</span>Aim for 2-4 sets per pair before moving on.</div>
-        <div class="rule"><span class="rule-n">3</span>"Per side" = reps for each arm or leg.</div>
-        <div class="rule"><span class="rule-n">4</span>"Alternating" = total reps, switching each rep.</div>
-        <div class="rule"><span class="rule-n">5</span>Tap the lock icon to keep an exercise on next shuffle.</div>
+        <div class="rule"><span class="rule-n">1</span>Pair 1 is always your warm-up - do it first.</div>
+        <div class="rule"><span class="rule-n">2</span>Do A then B back to back, then rest. That's 1 set.</div>
+        <div class="rule"><span class="rule-n">3</span>Aim for 2-4 sets per pair before moving on.</div>
+        <div class="rule"><span class="rule-n">4</span>"Per side" = reps for each arm or leg.</div>
+        <div class="rule"><span class="rule-n">5</span>"Alternating" = total reps, switching each rep.</div>
+        <div class="rule"><span class="rule-n">6</span>Tap the lock icon to keep an exercise on next shuffle.</div>
       </div>
       <button class="done-btn" id="done-btn" onclick="markDone()">Mark today as complete</button>
     </div>
@@ -108,6 +112,11 @@ html,body{height:100%;background:#0e0e0c;color:#f0efe8;font-family:-apple-system
 
 <script>
 var EX = [
+  {n:"Low impact jacks",r:"20",c:"total",cat:"warmup"},
+  {n:"Good morning squats",r:"12-15",c:"total",cat:"warmup"},
+  {n:"Russian twists",r:"16-24",c:"alternating",cat:"warmup"},
+  {n:"Squat reaches",r:"10-12",c:"total",cat:"warmup"},
+  {n:"Shoulder taps",r:"16-20",c:"alternating",cat:"warmup"},
   {n:"Lunges",r:"8-12",c:"per side",cat:"legs"},
   {n:"Squats (KB on neck)",r:"8-12",c:"total",cat:"legs"},
   {n:"Goblet squat",r:"8-12",c:"total",cat:"legs"},
@@ -116,20 +125,30 @@ var EX = [
   {n:"KB pack toss and squat",r:"8-12",c:"total",cat:"legs"},
   {n:"KB Kossak squat",r:"8-12",c:"per side",cat:"legs"},
   {n:"Sumo squat",r:"8-12",c:"total",cat:"legs"},
+  {n:"Staggered stance squat (1 KB)",r:"12",c:"per side",cat:"legs"},
   {n:"One hand press",r:"8-12",c:"per side",cat:"push"},
   {n:"See-saw KB press",r:"16-24",c:"alternating",cat:"push"},
   {n:"Static overhead curl",r:"8-12",c:"total",cat:"push"},
   {n:"Curl to press",r:"8-12",c:"total",cat:"push"},
+  {n:"Curl to press (1 KB)",r:"12",c:"total",cat:"push"},
   {n:"Overhead extension",r:"8-12",c:"total",cat:"push"},
   {n:"Concentration curl and press",r:"8-12",c:"per side",cat:"push"},
   {n:"Clean and press (1 bell)",r:"8-12",c:"per side",cat:"push"},
+  {n:"One hand jerk",r:"8-10",c:"per side",cat:"push"},
+  {n:"Two hand jerks",r:"8-10",c:"total",cat:"push"},
+  {n:"Front hold wrist twist (1 KB)",r:"15",c:"total",cat:"push"},
+  {n:"Front extension halo (1 KB)",r:"12",c:"total",cat:"push"},
+  {n:"Push up + pull through",r:"10",c:"per side",cat:"push"},
   {n:"Curl to clean",r:"8-12",c:"total",cat:"pull"},
-  {n:"Goblet curls",r:"8-12",c:"total",cat:"push"},
+  {n:"Goblet curls",r:"8-12",c:"total",cat:"pull"},
   {n:"One arm row",r:"8-12",c:"per side",cat:"pull"},
   {n:"KB row (1-1-2)",r:"16-24",c:"alternating",cat:"pull"},
   {n:"Two hand KB upright row",r:"8-12",c:"total",cat:"pull"},
+  {n:"Upright row (1 KB)",r:"12",c:"total",cat:"pull"},
   {n:"KB bent-over row",r:"8-12",c:"total",cat:"pull"},
   {n:"Deadlift + KB row",r:"8-12",c:"total",cat:"pull"},
+  {n:"Two hand row",r:"12",c:"total",cat:"pull"},
+  {n:"Deadlift to upright row (1 KB)",r:"12",c:"total",cat:"pull"},
   {n:"Around the world tap switch",r:"16-24",c:"alternating",cat:"core"},
   {n:"Side to side hip toss",r:"16-24",c:"alternating",cat:"core"},
   {n:"KB halo",r:"8-12",c:"total",cat:"core"},
@@ -142,6 +161,7 @@ var EX = [
   {n:"Turkish sit ups + 180",r:"16-24",c:"alternating",cat:"core"},
   {n:"Pendulums (1 bell)",r:"16-24",c:"alternating",cat:"core"},
   {n:"Half kneeling KB windmill",r:"8-12",c:"per side",cat:"core"},
+  {n:"Side clean",r:"16-24",c:"alternating",cat:"core"},
   {n:"Half snatch",r:"8-12",c:"per side",cat:"hinge"},
   {n:"High-low swings",r:"8-12",c:"total",cat:"hinge"},
   {n:"Figure 8 to side swing",r:"16-24",c:"alternating",cat:"hinge"},
@@ -156,9 +176,10 @@ var EX = [
   {n:"Lateral snatch",r:"8-12",c:"per side",cat:"hinge"},
   {n:"Pull and snatch (1 bell)",r:"8-12",c:"per side",cat:"hinge"},
   {n:"Outside step snatch",r:"8-12",c:"per side",cat:"hinge"},
-  {n:"American swing",r:"8-12",c:"total",cat:"hinge"},
+  {n:"American swing",r:"15",c:"total",cat:"hinge"},
   {n:"B-stance KB single RDL",r:"8-12",c:"per side",cat:"hinge"},
   {n:"Double KB RDL",r:"8-12",c:"total",cat:"hinge"},
+  {n:"Half snatch to front squat (1 KB)",r:"12",c:"per side",cat:"hinge"},
   {n:"Clean and press (2 bells)",r:"8-12",c:"total",cat:"full"},
   {n:"Side snatch to clean",r:"8-12",c:"per side",cat:"full"},
   {n:"Around the world to press",r:"16-24",c:"alternating",cat:"full"},
@@ -166,22 +187,18 @@ var EX = [
   {n:"Lateral clean snatch",r:"8-12",c:"per side",cat:"full"},
   {n:"Clean and snatch 2 KB",r:"8-12",c:"total",cat:"full"},
   {n:"Side snatch back lunge",r:"8-12",c:"per side",cat:"full"},
-  {n:"Russian twists",r:"16-24",c:"alternating",cat:"core"},
   {n:"Switch-hand windmills",r:"8-10",c:"per side",cat:"full"},
   {n:"Around the world to snatch",r:"8-10",c:"per side",cat:"full"},
-  {n:"One hand jerk",r:"8-10",c:"per side",cat:"push"},
-  {n:"Two hand jerks",r:"8-10",c:"total",cat:"push"},
-  {n:"Side clean",r:"16-24",c:"alternating",cat:"core"},
   {n:"Thrusters",r:"8-12",c:"total",cat:"full"}
 ];
 
-var LABELS = {legs:"Legs",push:"Push",pull:"Pull",core:"Core",hinge:"Hinge",full:"Full Body"};
-var PAIRS = [["legs","push"],["hinge","pull"],["legs","core"],["full","pull"],["hinge","push"]];
+var LABELS = {legs:"Legs",push:"Push",pull:"Pull",core:"Core",hinge:"Hinge",full:"Full Body",warmup:"Warm-up"};
+var PAIRS = [["warmup","warmup"],["hinge","pull"],["legs","core"],["full","pull"],["hinge","push"],["legs","push"]];
 var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 var DOWS = ["M","T","W","T","F","S","S"];
 
-var currentPairs = [[null,null],[null,null],[null,null],[null,null],[null,null]];
-var locked = [[false,false],[false,false],[false,false],[false,false],[false,false]];
+var currentPairs = [[null,null],[null,null],[null,null],[null,null],[null,null],[null,null]];
+var locked = [[false,false],[false,false],[false,false],[false,false],[false,false],[false,false]];
 
 var done = [];
 try { done = JSON.parse(localStorage.getItem("kb_done") || "[]"); } catch(e) {}
@@ -212,8 +229,11 @@ function renderPairs() {
   for (var i = 0; i < PAIRS.length; i++) {
     if (!locked[i][0]) currentPairs[i][0] = pick(PAIRS[i][0]);
     if (!locked[i][1]) currentPairs[i][1] = pick(PAIRS[i][1]);
-    html += '<div class="pair-card">';
-    html += '<div class="pair-header">Pair ' + (i+1) + ' &middot; Superset</div>';
+    var isWarmup = PAIRS[i][0] === "warmup";
+    html += '<div class="pair-card' + (isWarmup ? ' warmup-card' : '') + '">';
+    html += '<div class="pair-header' + (isWarmup ? ' warmup-header' : '') + '">';
+    html += isWarmup ? 'Warm-up &middot; Do this first' : 'Pair ' + i + ' &middot; Superset';
+    html += '</div>';
     html += exRow(currentPairs[i][0], i, 0);
     html += exRow(currentPairs[i][1], i, 1);
     html += '</div>';
