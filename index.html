@@ -198,7 +198,16 @@ var EX = [
   {n:"Hip to halo",r:"10-12",c:"total",cat:"core"},
   {n:"Crush curl to press",r:"10-12",c:"total",cat:"push"},
   {n:"Horn curl to press",r:"10-12",c:"total",cat:"push"},
-  {n:"V raise",r:"10-12",c:"total",cat:"pull"}
+  {n:"V raise",r:"10-12",c:"total",cat:"pull"},
+  {n:"Snatch > windmill > reverse lunge",r:"8-12",c:"per side",cat:"full"},
+  {n:"Swing > reverse lunge",r:"8-12",c:"per side",cat:"full"},
+  {n:"Curtsy lunge thrusters",r:"8-12",c:"per side",cat:"legs"},
+  {n:"Row > clean > lunge",r:"8-12",c:"per side",cat:"full"},
+  {n:"Kneeling press",r:"8-12",c:"per side",cat:"push"},
+  {n:"Offset kneel to stand",r:"8-12",c:"per side",cat:"full"},
+  {n:"Offset front-rack squat",r:"8-12",c:"per side",cat:"legs"},
+  {n:"Swing squat to high pull",r:"8-12",c:"per side",cat:"full"},
+  {n:"Dead stop swings",r:"8-12",c:"per side",cat:"hinge"}
 ];
 
 var LABELS = {legs:"Legs",push:"Push",pull:"Pull",core:"Core",hinge:"Hinge",full:"Full Body",warmup:"Warm-up"};
@@ -228,26 +237,28 @@ function shuf(a) {
   }
   return a;
 }
-function pick(cat) {
-  var pool = EX.filter(function(e) { return e.cat === cat; });
+function getLockedNames() {
+  var names = {};
+  for (var i = 0; i < PAIRS.length; i++) {
+    if (locked[i][0] && currentPairs[i][0]) names[currentPairs[i][0].n] = true;
+    if (locked[i][1] && currentPairs[i][1]) names[currentPairs[i][1].n] = true;
+  }
+  return names;
+}
+
+function pick(cat, exclude) {
+  var pool = EX.filter(function(e) { return e.cat === cat && !exclude[e.n]; });
+  if (!pool.length) pool = EX.filter(function(e) { return e.cat === cat; });
   return shuf(pool)[0];
 }
 
 function renderPairs() {
-  var html = "";
+  var lockedNames = getLockedNames();
   for (var i = 0; i < PAIRS.length; i++) {
-    if (!locked[i][0]) currentPairs[i][0] = pick(PAIRS[i][0]);
-    if (!locked[i][1]) currentPairs[i][1] = pick(PAIRS[i][1]);
-    var isWarmup = PAIRS[i][0] === "warmup";
-    html += '<div class="pair-card' + (isWarmup ? ' warmup-card' : '') + '">';
-    html += '<div class="pair-header' + (isWarmup ? ' warmup-header' : '') + '">';
-    html += isWarmup ? 'Warm-up &middot; Do this first' : 'Pair ' + i + ' &middot; Superset';
-    html += '</div>';
-    html += exRow(currentPairs[i][0], i, 0);
-    html += exRow(currentPairs[i][1], i, 1);
-    html += '</div>';
+    if (!locked[i][0]) currentPairs[i][0] = pick(PAIRS[i][0], lockedNames);
+    if (!locked[i][1]) currentPairs[i][1] = pick(PAIRS[i][1], lockedNames);
   }
-  document.getElementById("pairs-out").innerHTML = html;
+  renderPairsUI();
 }
 
 function exRow(ex, pairIdx, slot) {
@@ -264,7 +275,22 @@ function exRow(ex, pairIdx, slot) {
 
 function toggleLock(pairIdx, slot) {
   locked[pairIdx][slot] = !locked[pairIdx][slot];
-  renderPairs();
+  renderPairsUI();
+}
+
+function renderPairsUI() {
+  var html = "";
+  for (var i = 0; i < PAIRS.length; i++) {
+    var isWarmup = PAIRS[i][0] === "warmup";
+    html += '<div class="pair-card' + (isWarmup ? ' warmup-card' : '') + '">';
+    html += '<div class="pair-header' + (isWarmup ? ' warmup-header' : '') + '">';
+    html += isWarmup ? 'Warm-up &middot; Do this first' : 'Pair ' + i + ' &middot; Superset';
+    html += '</div>';
+    html += exRow(currentPairs[i][0], i, 0);
+    html += exRow(currentPairs[i][1], i, 1);
+    html += '</div>';
+  }
+  document.getElementById("pairs-out").innerHTML = html;
 }
 
 function updateDoneBtn() {
